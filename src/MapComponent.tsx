@@ -12,13 +12,14 @@ import './MapComponent.css'; // Importa los estilos CSS desde un archivo separad
 
 import {
   TerraDraw,
-  TerraDrawMapLibreGLAdapter,
   TerraDrawPointMode,
   TerraDrawPolygonMode,
   TerraDrawSelectMode,
   ValidateNotSelfIntersecting,
   // Removed ValidateMinAreaSquareMeters as it's unused
 } from 'terra-draw';
+
+import { TerraDrawMapLibreGLAdapter } from 'terra-draw-maplibre-gl-adapter';
 
 import Sidebar from './components/Sidebar';
 import {loadLayersRaster,loadLayersVector,loadGeom} from './components/MapLayers';
@@ -95,7 +96,7 @@ const MapComponent = () => {
         if (updateType === 'finish' || updateType === 'commit') {
           return ValidateNotSelfIntersecting(feature);
         }
-        return true;
+         return { valid: true };
       },
     });
 
@@ -126,8 +127,7 @@ const MapComponent = () => {
     // Inicializar Terra Draw
     drawRef.current = new TerraDraw({
       adapter: new TerraDrawMapLibreGLAdapter({
-        map: mapRef.current,
-        lib: maplibregl,
+        map: mapRef.current
       }),
       modes: [selectMode, polygonMode,pointMode],
     });
@@ -346,29 +346,26 @@ const MapComponent = () => {
   };
 
   return (
-    <div>
-      {/* Contenedor del Mapa */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div ref={mapContainerRef} style={{ width: '70%', height: '70vh', position: 'relative' }}>
-          {/* Componente Sidebar */}
-          <Sidebar
-            checked={checked}
-            layerBaseHandleChange={layerBaseHandleChange}
-            layerHandleChange={layerHandleChange}
-            searchHandleLayer={searchHandleLayer}
-          />
-        </div>
-      </div>
-
-      {/* Botones */}
+      <div className="map-wrapper">
+    <div ref={mapContainerRef} className="map-canvas">
+      {/* Overlay de botones */}
       {polygonWKT === null && (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div className="map-toolbar">
           <button onClick={switchToMode}>Dibujar</button>
           <button onClick={switchToSelectMode}>Seleccionar</button>
           <button onClick={deleteAllGeometries}>Borrar Todo</button>
         </div>
       )}
+
+      {/* Sidebar (si es flotante) */}
+      <Sidebar
+        checked={checked}
+        layerBaseHandleChange={layerBaseHandleChange}
+        layerHandleChange={layerHandleChange}
+        searchHandleLayer={searchHandleLayer}
+      />
     </div>
+  </div>
   );
 };
 
